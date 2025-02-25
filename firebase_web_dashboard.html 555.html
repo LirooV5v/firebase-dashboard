@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Web Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <h2>העלה קובץ Firebase JSON</h2>
+    <input type="file" id="firebaseFile" accept=".json">
+    <button onclick="uploadFirebaseConfig()">התחבר ל-Firebase</button>
+
+    <h2>רישום משתמש חדש</h2>
+    <input type="text" id="userId" placeholder="User ID">
+    <input type="text" id="username" placeholder="Username">
+    <button onclick="registerUser()">רשום משתמש</button>
+    
+    <h2>שליחת דיווח על איום</h2>
+    <input type="text" id="threatDetails" placeholder="Threat Details">
+    <button onclick="reportThreat()">דווח איום</button>
+    
+    <h2>פרסום פוסט בקהילה</h2>
+    <input type="text" id="postContent" placeholder="Post Content">
+    <button onclick="postToCommunity()">פרסם פוסט</button>
+    
+    <script>
+        let firebaseConfig = null;
+        let db = null;
+        
+        function uploadFirebaseConfig() {
+            const fileInput = document.getElementById("firebaseFile");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("נא לבחור קובץ JSON של Firebase");
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                firebaseConfig = JSON.parse(event.target.result);
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                alert("✅ Firebase מחובר בהצלחה!");
+            };
+            reader.readAsText(file);
+        }
+        
+        function registerUser() {
+            const userId = document.getElementById("userId").value;
+            const username = document.getElementById("username").value;
+            if (!db) { alert("חבר את Firebase קודם"); return; }
+            
+            db.collection("users").doc(userId).set({ username })
+                .then(() => alert("✅ משתמש נרשם בהצלחה!"))
+                .catch(error => alert("❌ שגיאה: " + error));
+        }
+        
+        function reportThreat() {
+            const threatDetails = document.getElementById("threatDetails").value;
+            if (!db) { alert("חבר את Firebase קודם"); return; }
+            
+            db.collection("threat_reports").add({ threatDetails })
+                .then(() => alert("✅ דיווח איום נשלח!"))
+                .catch(error => alert("❌ שגיאה: " + error));
+        }
+        
+        function postToCommunity() {
+            const postContent = document.getElementById("postContent").value;
+            if (!db) { alert("חבר את Firebase קודם"); return; }
+            
+            db.collection("community_posts").add({ postContent })
+                .then(() => alert("✅ הפוסט פורסם!"))
+                .catch(error => alert("❌ שגיאה: " + error));
+        }
+    </script>
+</body>
+</html>
